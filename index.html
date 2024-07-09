@@ -6,8 +6,6 @@
     <title>Web3 Chess Game</title>
     <!-- Include Ethers.js for blockchain interaction -->
     <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
-    <!-- Include Web3.js for wallet interaction -->
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <!-- Include chessboard.js and chess.js for chess game -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard.min.js"></script>
@@ -46,6 +44,9 @@
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     await provider.send("eth_requestAccounts", []);
                     signer = provider.getSigner();
+                    const address = await signer.getAddress();
+                    console.log(`Connected wallet address: ${address}`);
+
                     chessGameContract = new ethers.Contract('YOUR_CONTRACT_ADDRESS', [
                         // ABI of the contract
                         "function createGame() public",
@@ -69,7 +70,10 @@
 
         createGameButton.addEventListener('click', async () => {
             try {
-                await chessGameContract.createGame();
+                const tx = await chessGameContract.createGame();
+                console.log('Transaction sent:', tx);
+                await tx.wait();
+                console.log('Game created!');
                 alert('Game created!');
             } catch (error) {
                 console.error('Error creating game', error);
@@ -80,7 +84,10 @@
         joinGameButton.addEventListener('click', async () => {
             const gameId = prompt('Enter Game ID:');
             try {
-                await chessGameContract.joinGame(gameId);
+                const tx = await chessGameContract.joinGame(gameId);
+                console.log('Transaction sent:', tx);
+                await tx.wait();
+                console.log('Joined game!');
                 alert('Joined game!');
             } catch (error) {
                 console.error('Error joining game', error);
@@ -100,7 +107,10 @@
             board.position(chess.fen());
             const gameId = prompt('Enter Game ID to make move:');
             try {
-                await chessGameContract.makeMove(gameId, chess.fen());
+                const tx = await chessGameContract.makeMove(gameId, chess.fen());
+                console.log('Transaction sent:', tx);
+                await tx.wait();
+                console.log('Move made!');
             } catch (error) {
                 console.error('Error making move', error);
                 alert('Error making move. Check console for details.');
