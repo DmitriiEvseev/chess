@@ -40,32 +40,40 @@
         const createGameButton = document.getElementById('createGameButton');
         const joinGameButton = document.getElementById('joinGameButton');
 
-        connectWalletButton.addEventListener('click', async () => {
-            try {
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                signer = provider.getSigner();
-                chessGameContract = new ethers.Contract('YOUR_CONTRACT_ADDRESS', [
-                    // ABI of the contract
-                    "function createGame() public",
-                    "function joinGame(uint gameId) public",
-                    "function makeMove(uint gameId, string memory newBoardState) public",
-                ], signer);
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    chessGameContract = new ethers.Contract('YOUR_CONTRACT_ADDRESS', [
+                        // ABI of the contract
+                        "function createGame() public",
+                        "function joinGame(uint gameId) public",
+                        "function makeMove(uint gameId, string memory newBoardState) public",
+                    ], signer);
 
-                connectWalletButton.style.display = 'none';
-                createGameButton.style.display = 'block';
-                joinGameButton.style.display = 'block';
-            } catch (error) {
-                console.error(error);
+                    connectWalletButton.style.display = 'none';
+                    createGameButton.style.display = 'block';
+                    joinGameButton.style.display = 'block';
+                } catch (error) {
+                    console.error('Error connecting to MetaMask', error);
+                    alert('Error connecting to MetaMask. Check console for details.');
+                }
+            } else {
+                alert('MetaMask is not installed. Please install it to use this app.');
             }
-        });
+        }
+
+        connectWalletButton.addEventListener('click', connectWallet);
 
         createGameButton.addEventListener('click', async () => {
             try {
                 await chessGameContract.createGame();
                 alert('Game created!');
             } catch (error) {
-                console.error(error);
+                console.error('Error creating game', error);
+                alert('Error creating game. Check console for details.');
             }
         });
 
@@ -75,7 +83,8 @@
                 await chessGameContract.joinGame(gameId);
                 alert('Joined game!');
             } catch (error) {
-                console.error(error);
+                console.error('Error joining game', error);
+                alert('Error joining game. Check console for details.');
             }
         });
 
@@ -93,7 +102,8 @@
             try {
                 await chessGameContract.makeMove(gameId, chess.fen());
             } catch (error) {
-                console.error(error);
+                console.error('Error making move', error);
+                alert('Error making move. Check console for details.');
             }
         };
     </script>
