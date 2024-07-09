@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3 Chess Game</title>
+    <!-- Include Ethers.js for blockchain interaction -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+    <!-- Include Web3.js for wallet interaction -->
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <!-- Include chessboard.js and chess.js for chess game -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard.min.css">
+    <style>
+        #board {
+            width: 400px;
+        }
+        button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Web3 Chess Game</h1>
+    <div id="board"></div>
+    <button id="connectWalletButton">Connect Wallet</button>
+    <button id="createGameButton" style="display: none;">Create Game</button>
+    <button id="joinGameButton" style="display: none;">Join Game</button>
+
+    <script>
+        // Chess game setup
+        const board = Chessboard('board', 'start');
+        const chess = new Chess();
+
+        // Web3 and Ethereum setup
+        let provider, signer, chessGameContract;
+
+        const connectWalletButton = document.getElementById('connectWalletButton');
+        const createGameButton = document.getElementById('createGameButton');
+        const joinGameButton = document.getElementById('joinGameButton');
+
+        connectWalletButton.addEventListener('click', async () => {
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                chessGameContract = new ethers.Contract('YOUR_CONTRACT_ADDRESS', [
+                    // ABI of the contract
+                    "function createGame() public",
+                    "function joinGame(uint gameId) public",
+                    "function makeMove(uint gameId, string memory newBoardState) public",
+                ], signer);
+
+                connectWalletButton.style.display = 'none';
+                createGameButton.style.display = 'block';
+                joinGameButton.style.display = 'block';
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        createGameButton.addEventListener('click', async () => {
+            try {
+                await chessGameContract.createGame();
+                alert('Game created!');
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        joinGameButton.addEventListener('click', async () => {
+            const gameId = prompt('Enter Game ID:');
+            try {
+                await chessGameContract.joinGame(gameId);
+                alert('Joined game!');
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        board.onDrop = async (source, target) => {
+            const move = chess.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Automatically promote to queen
+            });
+
+            if (move === null) return 'snapback';
+
+            board.position(chess.fen());
+            const gameId = prompt('Enter Game ID to make move:');
+            try {
+                await chessGameContract.makeMove(gameId, chess.fen());
+            } catch (error) {
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>
