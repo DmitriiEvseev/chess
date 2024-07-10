@@ -137,6 +137,7 @@
                         highlightKingInCheck();
                     }
                 }
+                createBoard(); // Update the board after moving
             } else {
                 clearHighlights();
                 selectedPiece = null;
@@ -165,9 +166,6 @@
 
         boardState[toRow][toCol] = boardState[fromRow][fromCol];
         boardState[fromRow][fromCol] = '';
-
-        to.textContent = from.textContent;
-        from.textContent = '';
     }
 
     function highlightValidMoves(row, col) {
