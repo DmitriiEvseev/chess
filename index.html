@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Chess Game</title>
     <!-- Include chessboard.js and chess.js for chess game -->
-    <script src="https://cdn.jsdelivr.net/npm/chess.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/chessboard-1.0.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/chessboard-1.0.0.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.12.0/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard.min.css">
     <style>
         #board {
             width: 400px;
@@ -30,58 +30,55 @@
     <button id="resetGameButton">Reset Game</button>
 
     <script>
-        // Initialize chess game and board
-        const chess = new Chess();
-        const board = Chessboard('board', {
-            draggable: true,
-            position: 'start',
-            onDrop: handleMove
-        });
-
-        const gameStatusEl = document.getElementById('game-status');
-        const resetGameButton = document.getElementById('resetGameButton');
-
-        // Function to handle moves
-        function handleMove(source, target) {
-            const move = chess.move({
-                from: source,
-                to: target,
-                promotion: 'q' // Automatically promote to queen
+        document.addEventListener("DOMContentLoaded", function() {
+            const chess = new Chess();
+            const board = Chessboard('board', {
+                draggable: true,
+                position: 'start',
+                onDrop: handleMove
             });
 
-            if (move === null) return 'snapback';
+            const gameStatusEl = document.getElementById('game-status');
+            const resetGameButton = document.getElementById('resetGameButton');
 
-            updateGameStatus();
-        }
+            function handleMove(source, target) {
+                const move = chess.move({
+                    from: source,
+                    to: target,
+                    promotion: 'q' // Automatically promote to queen
+                });
 
-        // Function to update game status
-        function updateGameStatus() {
-            let status = '';
+                if (move === null) return 'snapback';
 
-            if (chess.in_checkmate()) {
-                status = 'Game over, ' + (chess.turn() === 'w' ? 'Black' : 'White') + ' is in checkmate.';
-            } else if (chess.in_draw()) {
-                status = 'Game over, drawn position';
-            } else {
-                status = 'Turn: ' + (chess.turn() === 'w' ? 'White' : 'Black');
-
-                if (chess.in_check()) {
-                    status += ', ' + (chess.turn() === 'w' ? 'White' : 'Black') + ' is in check';
-                }
+                updateGameStatus();
             }
 
-            gameStatusEl.innerHTML = status;
-        }
+            function updateGameStatus() {
+                let status = '';
 
-        // Reset game function
-        resetGameButton.addEventListener('click', () => {
-            chess.reset();
-            board.start();
+                if (chess.in_checkmate()) {
+                    status = 'Game over, ' + (chess.turn() === 'w' ? 'Black' : 'White') + ' is in checkmate.';
+                } else if (chess.in_draw()) {
+                    status = 'Game over, drawn position';
+                } else {
+                    status = 'Turn: ' + (chess.turn() === 'w' ? 'White' : 'Black');
+
+                    if (chess.in_check()) {
+                        status += ', ' + (chess.turn() === 'w' ? 'White' : 'Black') + ' is in check';
+                    }
+                }
+
+                gameStatusEl.innerHTML = status;
+            }
+
+            resetGameButton.addEventListener('click', () => {
+                chess.reset();
+                board.start();
+                updateGameStatus();
+            });
+
             updateGameStatus();
         });
-
-        // Initial game status
-        updateGameStatus();
     </script>
 </body>
 </html>
